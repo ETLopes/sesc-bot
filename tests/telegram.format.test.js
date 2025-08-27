@@ -1,8 +1,10 @@
+import { jest } from '@jest/globals';
 import { sendEventNotification } from '../src/telegram.js';
 import { Telegraf } from 'telegraf';
 
 describe('telegram message format', () => {
     beforeEach(() => {
+        process.env.TELEGRAM_BOT_TOKEN = ''; // ensure getBot returns null path
         process.env.TELEGRAM_CHANNEL_ID = '@fallback';
         process.env.TELEGRAM_CHANNEL_ID_MUSICA = '@musica';
         Telegraf.prototype.telegram.sendMessage.mockReset();
@@ -17,7 +19,7 @@ describe('telegram message format', () => {
             categorias: 'Música',
             link: 'https://example.com',
         };
-        await sendEventNotification(ev);
+        await sendEventNotification(ev, { telegram: Telegraf.prototype.telegram });
         expect(Telegraf.prototype.telegram.sendMessage).toHaveBeenCalledTimes(1);
         const [_chat, text] = Telegraf.prototype.telegram.sendMessage.mock.calls[0];
         expect(text).toMatch('Sesc SP');

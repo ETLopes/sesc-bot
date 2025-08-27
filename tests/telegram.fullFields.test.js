@@ -1,8 +1,10 @@
-import { sendEventNotification, sendNoNewEventsMessage } from '../src/telegram.js';
+// Dynamic import inside tests to re-evaluate env-dependent config
 
 test('caption includes all optional fields when present', async() => {
     const fakeBot = { telegram: { sendMessage: jest.fn().mockResolvedValue() } };
     process.env.TELEGRAM_CHANNEL_ID = '@fallback';
+    const { sendEventNotification } = await
+    import ('../src/telegram.js');
     await sendEventNotification({
         titulo: 'Show',
         complemento: 'Sub',
@@ -21,6 +23,8 @@ test('caption includes all optional fields when present', async() => {
 test('caption omits optional fields when absent', async() => {
     const fakeBot = { telegram: { sendMessage: jest.fn().mockResolvedValue() } };
     process.env.TELEGRAM_CHANNEL_ID = '@fallback';
+    const { sendEventNotification } = await
+    import ('../src/telegram.js');
     await sendEventNotification({ titulo: 'X', link: 'http://x' }, fakeBot);
     const [_chat, text] = fakeBot.telegram.sendMessage.mock.calls[0];
     expect(text).not.toMatch('Ingressos (web)');
@@ -30,6 +34,8 @@ test('caption omits optional fields when absent', async() => {
 test('sendNoNewEventsMessage uses injected bot and channel pick', async() => {
     const fakeBot = { telegram: { sendMessage: jest.fn().mockResolvedValue() } };
     process.env.TELEGRAM_CHANNEL_ID = '@fallback';
+    const { sendNoNewEventsMessage } = await
+    import ('../src/telegram.js');
     await sendNoNewEventsMessage({ categoria: 'teatro' }, fakeBot);
     expect(fakeBot.telegram.sendMessage).toHaveBeenCalled();
 });
