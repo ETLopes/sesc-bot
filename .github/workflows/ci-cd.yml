@@ -90,4 +90,4 @@ jobs:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
         run: |
           IMAGE=${{ needs.build.outputs.image }}
-          flyctl deploy -i "$IMAGE" --build-arg NODE_ENV=production
+          flyctl deploy -i "$IMAGE" --strategy immediate --build-arg NODE_ENV=production

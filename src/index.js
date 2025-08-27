@@ -9,7 +9,7 @@ import {
 import fs from 'fs';
 import path from 'path';
 import { fetchSescEvents } from './sescApi.js';
-import { sendEventNotification, sendNoNewEventsMessage } from './telegram.js';
+import { sendEventNotification } from './telegram.js';
 import { POLL_INTERVAL_MINUTES, SKIP_POST_ON_FIRST_SYNC, DEFAULT_CATEGORIA, CATEGORIES } from './config.js';
 import logger from './logger.js';
 
@@ -64,13 +64,7 @@ async function syncOnce({ isFirstRun = false, categoria = DEFAULT_CATEGORIA } = 
         }
         logger.info({ newCount }, 'Sync complete');
         writeHeartbeat({ ok: true, newCount });
-        if (newCount === 0 && (!isFirstRun || !SKIP_POST_ON_FIRST_SYNC)) {
-            try {
-                await sendNoNewEventsMessage({ categoria });
-            } catch (err) {
-                logger.error({ err }, 'Failed to send no-new-events message');
-            }
-        }
+        if (newCount === 0) logger.info({ categoria }, 'No new events');
     } catch (err) {
         logger.error({ err }, 'syncOnce failed');
         writeHeartbeat({ ok: false, newCount: 0 });
