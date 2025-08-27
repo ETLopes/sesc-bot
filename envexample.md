@@ -27,6 +27,10 @@ ONLINE=
 
 # Logging
 LOG_LEVEL=info
+
+# Liveness/Watchdog (optional)
+HEARTBEAT_PATH=./data/heartbeat.json
+LIVENESS_WINDOW_SEC=600
 ```
 
 Descriptions:
