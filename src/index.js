@@ -46,10 +46,15 @@ async function syncOnce({ isFirstRun = false, categoria = DEFAULT_CATEGORIA } = 
             if (existingIds.has(ev.id)) continue;
             const inserted = await insertEvent(db, ev);
             if (inserted) {
+                // Log full payload for debugging
+                logger.info({ event: ev }, 'Inserted new event into DB');
                 newCount += 1;
                 if (!isFirstRun || !SKIP_POST_ON_FIRST_SYNC) {
                     try {
-                        await sendEventNotification(ev);
+                        const posted = await sendEventNotification(ev);
+                        if (!posted) {
+                            logger.info({ id: ev.id }, 'Event not posted (missing Telegram config/channel)');
+                        }
                     } catch (err) {
                         const errMsg = err && err.message ? String(err.message) : '';
                         if (!warnedTelegramMissing && errMsg.includes('not set')) {
@@ -59,6 +64,8 @@ async function syncOnce({ isFirstRun = false, categoria = DEFAULT_CATEGORIA } = 
                             logger.error({ err, id: ev.id }, 'Error posting event');
                         }
                     }
+                } else {
+                    logger.info({ id: ev.id, categoria }, 'Skipped posting (dry run)');
                 }
             }
         }

@@ -21,12 +21,14 @@ function normalizeCategories(categorias) {
 }
 
 export function normalizeEvent(raw) {
+    if (!raw || typeof raw !== 'object' || raw.id == null) return null;
     return {
         id: raw.id,
         titulo: raw.titulo,
         complemento: raw.complemento || null,
-        qtdeIngressosWeb: typeof raw.qtdeIngressosWeb === 'number' ?
-            raw.qtdeIngressosWeb : raw.qtdeIngressosWeb || null,
+        qtdeIngressosWeb: typeof raw.qtdeIngressosWeb === 'number'
+            ? raw.qtdeIngressosWeb
+            : raw.qtdeIngressosWeb || null,
         link: raw.link ? `https://www.sescsp.org.br${raw.link}` : null,
         dataPrimeiraSessao: raw.dataPrimeiraSessao || null,
         dataUltimaSessao: raw.dataUltimaSessao || null,
@@ -86,7 +88,7 @@ export async function fetchSescEvents({ categoria = DEFAULT_CATEGORIA } = {}) {
         const data = await res.json();
         const items = Array.isArray(data && data.atividade) ? data.atividade : [];
         if (items.length === 0) break;
-        const normalized = items.map(normalizeEvent);
+        const normalized = items.map(normalizeEvent).filter(Boolean);
         allEvents.push(...normalized);
     }
 

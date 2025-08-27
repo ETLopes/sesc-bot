@@ -32,7 +32,7 @@ export async function sendEventNotification(event, injectedBot) {
     const channel = pickChannelForEvent(event);
     if (!bot || !channel) {
         logger.warn('Telegram config missing; skipping notification');
-        return;
+        return false;
     }
 
     function fmtDate(dateIso) {
@@ -62,6 +62,7 @@ export async function sendEventNotification(event, injectedBot) {
     try {
         await bot.telegram.sendMessage(channel, caption, { disable_web_page_preview: false });
         logger.info({ id: event.id }, 'Posted new event to Telegram');
+        return true;
     } catch (err) {
         logger.error({ err }, 'Failed to send Telegram message');
         throw err;
