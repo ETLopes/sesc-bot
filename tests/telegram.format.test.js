@@ -1,5 +1,4 @@
 import { jest } from '@jest/globals';
-import { sendEventNotification } from '../src/telegram.js';
 import { Telegraf } from 'telegraf';
 
 describe('telegram message format', () => {
@@ -19,6 +18,8 @@ describe('telegram message format', () => {
             categorias: 'Música',
             link: 'https://example.com',
         };
+        const { sendEventNotification } = await
+        import ('../src/telegram.js');
         await sendEventNotification(ev, { telegram: Telegraf.prototype.telegram });
         expect(Telegraf.prototype.telegram.sendMessage).toHaveBeenCalledTimes(1);
         const [_chat, text] = Telegraf.prototype.telegram.sendMessage.mock.calls[0];
