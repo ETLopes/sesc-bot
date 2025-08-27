@@ -13,7 +13,11 @@ describe('db schema and inserts', () => {
     });
 
     afterAll(() => {
-        try { if (fs.existsSync(tmpDb)) fs.unlinkSync(tmpDb); } catch {}
+        try {
+            if (fs.existsSync(tmpDb)) fs.unlinkSync(tmpDb);
+        } catch (e) {
+            // cleanup best effort
+        }
     });
 
     test('ensureSchema and insertEvent', async() => {

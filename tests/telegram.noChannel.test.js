@@ -1,5 +1,3 @@
-import { sendEventNotification } from '../src/telegram.js';
-
 test('sendEventNotification exits early when no channel resolved', async() => {
     jest.resetModules();
     process.env.TELEGRAM_CHANNEL_ID = '';

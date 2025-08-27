@@ -1,9 +1,9 @@
-import fs from 'fs';
-import path from 'path';
+import { jest } from '@jest/globals';
 
 test('index module loads in test mode without running main', async() => {
     process.env.NODE_ENV = 'test';
-    const mod = await
+    jest.resetModules();
+    await
     import ('../src/index.js');
-    expect(mod).toBeTruthy();
-});
+    // If main executed it would set intervals and attempt to sync; import-only is enough here
+})

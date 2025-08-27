@@ -1,18 +1,15 @@
-import fetch from 'node-fetch';
-
-jest.mock('node-fetch');
+import _fetch from 'node-fetch';
 
 test('fetchSescEvents reflects GRATUITO_PARAM and ONLINE_PARAM in URL', async() => {
     jest.resetModules();
-    process.env.GRATUITO = 'sim';
-    process.env.ONLINE = 'nao';
-    const { default: fetchMock } = await
-    import ('node-fetch');
-    fetchMock.mockResolvedValueOnce({ ok: true, json: async() => ({ atividade: [] }) });
-    const { fetchSescEvents: fetchFn } = await
+    process.env.GRATUITO = '1';
+    process.env.ONLINE = '0';
+    const dataInicialIso = '2025-01-01';
+    const dataFinalIso = '2026-01-01';
+    const { buildUrl } = await
     import ('../src/sescApi.js');
-    await fetchFn({ categoria: 'musica' });
-    const url = fetchMock.mock.calls[0][0];
-    expect(url).toContain('gratuito=sim');
-    expect(url).toContain('online=nao');
-});
+    const url = buildUrl({ categoria: 'musica', page: 2, dataInicialIso, dataFinalIso });
+    expect(url).toContain('gratuito=1');
+    expect(url).toContain('online=0');
+    expect(url).toContain('page=2');
+})

@@ -23,4 +23,17 @@ export default [
         },
         ignores: ['node_modules/', 'data/', 'dist/'],
     },
+    {
+        files: ['tests/**/*.test.js'],
+        languageOptions: {
+            globals: {
+                ...globals.node,
+                ...globals.jest,
+            },
+        },
+        rules: {
+            'no-undef': 'off',
+            'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+        },
+    },
 ];

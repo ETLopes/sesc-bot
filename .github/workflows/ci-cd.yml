@@ -59,10 +59,11 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Define image tag
+      - name: Define image tag (lowercase repo)
         id: meta
         run: |
-          IMAGE_REF=${{ env.REGISTRY}}/${{ github.repository }}:${{ github.sha }}
+          REPO_LC=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_REF=${{ env.REGISTRY}}/${REPO_LC}:${{ github.sha }}
           echo "image=$IMAGE_REF" >> "$GITHUB_OUTPUT"
       - name: Build and push with cache
         uses: docker/build-push-action@v5

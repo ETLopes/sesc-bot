@@ -1,3 +1,4 @@
+/* global jest */
 export class Telegraf {}
 
 Telegraf.prototype.telegram = {

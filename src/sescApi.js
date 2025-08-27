@@ -26,8 +26,7 @@ export function normalizeEvent(raw) {
         titulo: raw.titulo,
         complemento: raw.complemento || null,
         qtdeIngressosWeb: typeof raw.qtdeIngressosWeb === 'number' ?
-            raw.qtdeIngressosWeb :
-            raw.qtdeIngressosWeb || null,
+            raw.qtdeIngressosWeb : raw.qtdeIngressosWeb || null,
         link: raw.link ? `https://www.sescsp.org.br${raw.link}` : null,
         dataPrimeiraSessao: raw.dataPrimeiraSessao || null,
         dataUltimaSessao: raw.dataUltimaSessao || null,
@@ -38,7 +37,7 @@ export function normalizeEvent(raw) {
     };
 }
 
-function buildUrl({ page, categoria, dataInicialIso, dataFinalIso }) {
+export function buildUrl({ page, categoria, dataInicialIso, dataFinalIso }) {
     const params = new URLSearchParams();
     params.set('local', LOCAL_IDS);
     params.set('categoria', categoria || DEFAULT_CATEGORIA);

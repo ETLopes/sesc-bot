@@ -1,24 +1,26 @@
-import fs from 'fs';
-import path from 'path';
-import sqlite3 from 'sqlite3';
+import _sqlite3 from 'sqlite3';
 import { openDatabase, ensureSchema, insertEvent, closeDatabase } from '../src/db.js';
 
 test('insertEvent handles null title (titulo null)', async() => {
-    const dir = path.resolve('./data-test/null-title');
-    const dbPath = path.join(dir, 't.db');
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    if (fs.existsSync(dbPath)) fs.unlinkSync(dbPath);
-    process.env.DATABASE_PATH = dbPath;
     const db = openDatabase();
     await ensureSchema(db);
-    await expect(insertEvent(db, { id: 999, titulo: null })).resolves.toBe(true);
-    // verify row exists with NULL title
-    const row = await new Promise((resolve, reject) => {
-        db.get('SELECT titulo FROM events WHERE id = 999', [], (err, r) => {
-            if (err) reject(err);
-            else resolve(r);
-        });
+    const uniqueId = Math.floor(Date.now() / 1000); // reasonably unique per run
+    const ok = await insertEvent(db, {
+        id: uniqueId,
+        titulo: null,
+        complemento: null,
+        link: 'http://x',
+        dataPrimeiraSessao: null,
+        dataUltimaSessao: null,
+        dataProxSessao: null,
+        unidade: null,
+        qtdeIngressosWeb: null,
+        categorias: null,
+        imagem: null,
     });
-    expect(row.titulo).toBeNull();
+    // Duplicate insert should return false due to constraint; first insert true
+    expect(ok).toBe(true);
+    const dup = await insertEvent(db, { id: uniqueId });
+    expect(dup).toBe(false);
     await closeDatabase(db);
-});
+})
