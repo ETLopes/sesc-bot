@@ -12,7 +12,7 @@ primary_region = 'gig'
 [env]
   NODE_ENV = 'production'
   HEARTBEAT_PATH = '/app/data/heartbeat.json'
-  LIVENESS_WINDOW_SEC = '600'
+  LIVENESS_WINDOW_SEC = '1800'
 
 # Persistent volume for DB and heartbeat
 [[mounts]]

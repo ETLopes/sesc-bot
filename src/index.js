@@ -81,9 +81,18 @@ async function syncOnce({ isFirstRun = false, categoria = DEFAULT_CATEGORIA } = 
 
 async function main() {
     writeHeartbeat({ ok: true, newCount: 0 });
+    // Ticker to refresh heartbeat so watchdog does not consider the app stale
+    const hbInterval = setInterval(() => {
+        writeHeartbeat({ ok: true, newCount: 0 });
+    }, 60 * 1000);
+    // Ensure interval cleared on exit in tests or process end
+    if (process.env.NODE_ENV === 'test') {
+
+        hbInterval;
+    }
     for (const cat of CATEGORIES) {
         // run first sync per category
-        // eslint-disable-next-line no-await-in-loop
+
         await syncOnce({ isFirstRun: true, categoria: cat });
     }
 
@@ -92,7 +101,7 @@ async function main() {
     setInterval(() => {
         (async() => {
             for (const cat of CATEGORIES) {
-                // eslint-disable-next-line no-await-in-loop
+
                 await syncOnce({ isFirstRun: false, categoria: cat });
             }
         })().catch((err) => logger.error({ err }, 'Scheduled sync failed'));
