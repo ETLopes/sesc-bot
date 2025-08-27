@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  sesc-bot:
+    build: .
+    image: sesc-bot:latest
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    entrypoint: ['/app/src/scripts/watchdog.sh']
+    healthcheck:
+      test: ['CMD', 'node', 'src/scripts/healthcheck.js']
+      interval: 1m
+      timeout: 10s
+      start_period: 30s
+      retries: 3
