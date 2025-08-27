@@ -21,10 +21,16 @@ POLL_INTERVAL_MINUTES=60
 SESC_API_BASE=https://www.sescsp.org.br/wp-json/wp/v1/atividades/filter
 LOCAL_IDS=761,2,43,47,48,49,50,730,51,52,53,54,71,55,56,57,80,58,60,61,62,63,64,65,66
 CATEGORIA_DEFAULT=musica
+# Multi-categorias: sincroniza várias categorias por ciclo (opcional)
+CATEGORIES=musica,teatro
 GRATUITO=
 ONLINE=
 SKIP_POST_ON_FIRST_SYNC=true
 LOG_LEVEL=info
+# Liveness / Watchdog (opcional)
+HEARTBEAT_PATH=./data/heartbeat.json
+LIVENESS_WINDOW_SEC=1800
+GRACE_SEC=120
 ```
 
 ### Scripts
@@ -45,6 +51,9 @@ LOG_LEVEL=info
 - O endpoint público de referência é da Sesc SP [`/wp-json/wp/v1/atividades/filter`](https://www.sescsp.org.br/wp-json/wp/v1/atividades/filter?local=&categoria=&gratuito=&online=&data_inicial=&data_final=&tipo=atividade&dinamico=true&ppp=1000&page=1).
 - Datas são dinâmicas: `data_inicial` = hoje, `data_final` = hoje + 1 ano.
 - Categoria padrão: música; suporte futuro para teatro em canal específico.
+- Liveness/Watchdog: o processo grava um heartbeat periódico em `HEARTBEAT_PATH`. O watchdog considera o app saudável se o arquivo foi atualizado recentemente.
+  - `LIVENESS_WINDOW_SEC`: janela máxima de inatividade do heartbeat antes de reiniciar (padrão 1800s).
+  - `GRACE_SEC`: período de carência após o startup para permitir o primeiro heartbeat (padrão 120s).
 
 ### Docker
 
@@ -64,3 +73,4 @@ Notas:
 
 - Monte `./data` para persistir o SQLite.
 - Use um `.env` na raiz (o compose carrega automaticamente).
+- A imagem usa um watchdog PID1 que verifica o `HEARTBEAT_PATH`; ajuste `LIVENESS_WINDOW_SEC`/`GRACE_SEC` via variáveis de ambiente para o seu cenário.

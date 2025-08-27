@@ -30,7 +30,8 @@ LOG_LEVEL=info
 
 # Liveness/Watchdog (optional)
 HEARTBEAT_PATH=./data/heartbeat.json
-LIVENESS_WINDOW_SEC=600
+LIVENESS_WINDOW_SEC=1800
+GRACE_SEC=120
 ```
 
 Descriptions:
@@ -49,3 +50,9 @@ Descriptions:
 - **GRATUITO**: Leave empty or set a value to filter by free events.
 - **ONLINE**: Leave empty or set a value to filter online events.
 - **LOG_LEVEL**: Logger level (info, debug, warn, error).
+
+Liveness/Watchdog:
+
+- **HEARTBEAT_PATH**: Caminho do arquivo de heartbeat (padrão `./data/heartbeat.json`).
+- **LIVENESS_WINDOW_SEC**: Janela máxima (em segundos) sem atualizar o heartbeat antes do watchdog reiniciar o app (padrão 1800s).
+- **GRACE_SEC**: Carência (em segundos) após o startup para permitir o primeiro heartbeat sem reinício (padrão 120s).
