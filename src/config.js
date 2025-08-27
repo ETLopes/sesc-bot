@@ -10,7 +10,8 @@ export const TELEGRAM_CHANNEL_ID_TEATRO = process.env.TELEGRAM_CHANNEL_ID_TEATRO
 
 export const DATABASE_PATH = process.env.DATABASE_PATH ?
     path.resolve(process.env.DATABASE_PATH) :
-    /* istanbul ignore next */ path.resolve('data/sesc.db');
+    /* istanbul ignore next */
+    path.resolve('data/sesc.db');
 
 export const SESC_API_BASE =
     process.env.SESC_API_BASE || /* istanbul ignore next */ 'https://www.sescsp.org.br/wp-json/wp/v1/atividades/filter';
@@ -18,6 +19,10 @@ export const SESC_API_BASE =
 export const POLL_INTERVAL_MINUTES = Number(process.env.POLL_INTERVAL_MINUTES || /* istanbul ignore next */ 60);
 
 export const DEFAULT_CATEGORIA = process.env.CATEGORIA_DEFAULT || /* istanbul ignore next */ 'musica';
+export const CATEGORIES = (process.env.CATEGORIES || DEFAULT_CATEGORIA)
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
 export const LOCAL_IDS = (
     process.env.LOCAL_IDS ||
     /* istanbul ignore next */

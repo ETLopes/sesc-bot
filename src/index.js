@@ -10,7 +10,7 @@ import fs from 'fs';
 import path from 'path';
 import { fetchSescEvents } from './sescApi.js';
 import { sendEventNotification, sendNoNewEventsMessage } from './telegram.js';
-import { POLL_INTERVAL_MINUTES, SKIP_POST_ON_FIRST_SYNC, DEFAULT_CATEGORIA } from './config.js';
+import { POLL_INTERVAL_MINUTES, SKIP_POST_ON_FIRST_SYNC, DEFAULT_CATEGORIA, CATEGORIES } from './config.js';
 import logger from './logger.js';
 
 function getHeartbeatPath() {
@@ -81,14 +81,21 @@ async function syncOnce({ isFirstRun = false, categoria = DEFAULT_CATEGORIA } = 
 
 async function main() {
     writeHeartbeat({ ok: true, newCount: 0 });
-    await syncOnce({ isFirstRun: true, categoria: DEFAULT_CATEGORIA });
+    for (const cat of CATEGORIES) {
+        // run first sync per category
+        // eslint-disable-next-line no-await-in-loop
+        await syncOnce({ isFirstRun: true, categoria: cat });
+    }
 
     const intervalMs = POLL_INTERVAL_MINUTES * 60 * 1000;
     logger.info({ everyMinutes: POLL_INTERVAL_MINUTES }, 'Starting scheduler');
     setInterval(() => {
-        syncOnce({ isFirstRun: false, categoria: DEFAULT_CATEGORIA }).catch((err) =>
-            logger.error({ err }, 'Scheduled sync failed'),
-        );
+        (async() => {
+            for (const cat of CATEGORIES) {
+                // eslint-disable-next-line no-await-in-loop
+                await syncOnce({ isFirstRun: false, categoria: cat });
+            }
+        })().catch((err) => logger.error({ err }, 'Scheduled sync failed'));
     }, intervalMs);
 }
 
