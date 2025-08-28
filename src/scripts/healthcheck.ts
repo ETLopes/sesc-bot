@@ -11,7 +11,7 @@ import {
   GRATUITO_PARAM,
   ONLINE_PARAM,
   TELEGRAM_BOT_TOKEN,
-} from '../config';
+} from '../config.js';
 
 function ok(msg) {
   console.log(`OK: ${msg}`);

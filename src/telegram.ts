@@ -4,8 +4,8 @@ import {
   TELEGRAM_CHANNEL_ID,
   TELEGRAM_CHANNEL_ID_MUSICA,
   TELEGRAM_CHANNEL_ID_TEATRO,
-} from './config';
-import logger from './logger';
+} from './config.js';
+import logger from './logger.js';
 
 let botInstance: Telegraf | null = null;
 

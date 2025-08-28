@@ -1,2 +1,2 @@
 // Deprecated; re-export for backwards compatibility
-export * from './sescApi';
+export * from './sescApi.js';

@@ -5,8 +5,8 @@ import {
   LOCAL_IDS,
   GRATUITO_PARAM,
   ONLINE_PARAM,
-} from './config';
-import logger from './logger';
+} from './config.js';
+import logger from './logger.js';
 
 function normalizeUnit(unidade: any): string | null {
   if (!Array.isArray(unidade) || unidade.length === 0) return null;

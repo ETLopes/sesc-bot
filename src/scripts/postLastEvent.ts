@@ -1,7 +1,7 @@
 import 'dotenv/config';
-import { openDatabase, ensureSchema, closeDatabase } from '../db';
-import { sendEventNotification } from '../telegram';
-import logger from '../logger';
+import { openDatabase, ensureSchema, closeDatabase } from '../db.js';
+import { sendEventNotification } from '../telegram.js';
+import logger from '../logger.js';
 
 function get(db: any, sql: string, params: unknown[] = []): Promise<any> {
   return new Promise<any>((resolve, reject) => {

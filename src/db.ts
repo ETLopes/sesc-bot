@@ -1,7 +1,7 @@
 import sqlite3 from 'sqlite3';
 import fs from 'fs';
 import path from 'path';
-import { DATABASE_PATH as DEFAULT_DATABASE_PATH } from './config';
+import { DATABASE_PATH as DEFAULT_DATABASE_PATH } from './config.js';
 
 sqlite3.verbose();
 

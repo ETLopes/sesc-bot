@@ -6,18 +6,18 @@ import {
   insertEvent,
   closeDatabase,
   EventRecord,
-} from './db';
+} from './db.js';
 import fs from 'fs';
 import path from 'path';
-import { fetchSescEvents } from './sescApi';
-import { sendEventNotification } from './telegram';
+import { fetchSescEvents } from './sescApi.js';
+import { sendEventNotification } from './telegram.js';
 import {
   POLL_INTERVAL_MINUTES,
   SKIP_POST_ON_FIRST_SYNC,
   DEFAULT_CATEGORIA,
   CATEGORIES,
-} from './config';
-import logger from './logger';
+} from './config.js';
+import logger from './logger.js';
 
 function getHeartbeatPath(): string {
   const dbPath = process.env.DATABASE_PATH || 'data/sesc.db';
