@@ -7,11 +7,13 @@ WORKDIR /app
 FROM base AS deps
 RUN apk add --no-cache python3 make g++
 COPY package.json package-lock.json* ./
-RUN npm ci --omit=dev
+RUN npm ci
 
 FROM base AS build
 COPY --from=deps /app/node_modules /app/node_modules
 COPY . .
+RUN npm run build
+RUN npm prune --omit=dev
 
 # Runtime image
 FROM node:20-alpine AS runner
@@ -30,7 +32,7 @@ VOLUME ["/app/data"]
 
 USER appuser
 
-HEALTHCHECK --interval=1m --timeout=10s --start-period=30s --retries=3 CMD node src/scripts/healthcheck.js || exit 1
+HEALTHCHECK --interval=1m --timeout=10s --start-period=30s --retries=3 CMD node dist/scripts/healthcheck.js || exit 1
 
 ENTRYPOINT ["/app/src/scripts/watchdog.sh"]
 

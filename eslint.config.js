@@ -24,7 +24,7 @@ export default [
         ignores: ['node_modules/', 'data/', 'dist/'],
     },
     {
-        files: ['tests/**/*.test.js'],
+        files: ['tests/**/*.test.{js,ts}'],
         languageOptions: {
             globals: {
                 ...globals.node,

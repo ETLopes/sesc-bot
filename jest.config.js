@@ -1,18 +1,21 @@
 export default {
     testEnvironment: 'node',
     transform: {
-        '^.+\\.[jt]s$': ['babel-jest', { rootMode: 'upward' }],
+        '^.+\\.[jt]sx?$': ['babel-jest', { rootMode: 'upward' }],
     },
     roots: ['<rootDir>/tests'],
-    moduleFileExtensions: ['js'],
+    moduleFileExtensions: ['ts', 'js'],
     moduleNameMapper: {
-        '^node-fetch$': '<rootDir>/tests/mocks/node-fetch.js',
-        '^telegraf$': '<rootDir>/tests/mocks/telegraf.js',
+        '^node-fetch$': '<rootDir>/tests/mocks/node-fetch.ts',
+        '^telegraf$': '<rootDir>/tests/mocks/telegraf.ts',
+        '^../src/(.*)\\.js$': '<rootDir>/src/$1.ts',
+        '^@mocks/(.*)$': '<rootDir>/tests/mocks/$1'
     },
     collectCoverage: true,
     collectCoverageFrom: [
-        'src/**/*.js',
+        'src/**/*.{ts,js}',
         '!src/index.js',
+        '!src/index.ts',
         '!src/scripts/**',
         '!src/**/mocks/**',
     ],
@@ -20,11 +23,12 @@ export default {
     coverageReporters: ['text', 'lcov', 'html'],
     coverageThreshold: {
         global: {
-            branches: 60,
-            functions: 85,
-            lines: 75,
-            statements: 75,
+            branches: 100,
+            functions: 100,
+            lines: 100,
+            statements: 100,
         },
     },
     verbose: true,
+    testPathIgnorePatterns: ['/node_modules/', '/tests/legacy/'],
 };

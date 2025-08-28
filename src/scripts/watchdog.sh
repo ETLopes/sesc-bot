@@ -6,8 +6,8 @@ HEARTBEAT_PATH=${HEARTBEAT_PATH:-/app/data/heartbeat.json}
 LIVENESS_WINDOW_SEC=${LIVENESS_WINDOW_SEC:-600} # 10 minutes default
 GRACE_SEC=${GRACE_SEC:-120} # grace period after startup to allow first heartbeat
 
-# Start app in background
-node /app/src/index.js &
+# Start app in background (TypeScript build output)
+node /app/dist/index.js &
 APP_PID=$!
 
 echo "watchdog: started app pid=$APP_PID, monitoring $HEARTBEAT_PATH"

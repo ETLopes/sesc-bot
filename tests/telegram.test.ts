@@ -1,0 +1,20 @@
+// Aggregated tests for telegram
+import './legacy/telegram.branches.extra.test';
+import './legacy/telegram.caption.branches.test';
+import './legacy/telegram.dateFallback.test';
+import './legacy/telegram.errors.test';
+import './legacy/telegram.fallback.channel.test';
+import './legacy/telegram.fallbacks.test';
+import './legacy/telegram.format.test';
+import './legacy/telegram.fullFields.test';
+import './legacy/telegram.log.branches.test';
+import './legacy/telegram.noChannel.test';
+import './legacy/telegram.noNewEvents.defaultMessage.test';
+import './legacy/telegram.noNewEvents.defaultParam.test';
+import './legacy/telegram.noNewEventsError.test';
+import './legacy/telegram.noNewEventsSkip.test';
+import './legacy/telegram.pickCategory.empty.test';
+import './legacy/telegram.pickCategory.musica.test';
+import './legacy/telegram.pickChannel.test';
+import './legacy/telegram.test';
+import './legacy/telegram.getBot.instantiation.test';
