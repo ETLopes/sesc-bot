@@ -1,11 +1,11 @@
 import 'dotenv/config';
-import { openDatabase, ensureSchema, closeDatabase } from '../db.js';
-import { sendEventNotification } from '../telegram.js';
-import logger from '../logger.js';
+import { openDatabase, ensureSchema, closeDatabase } from '../db';
+import { sendEventNotification } from '../telegram';
+import logger from '../logger';
 
-function get(db, sql, params = []) {
-  return new Promise((resolve, reject) => {
-    db.get(sql, params, (err, row) => {
+function get(db: any, sql: string, params: unknown[] = []): Promise<any> {
+  return new Promise<any>((resolve, reject) => {
+    db.get(sql, params, (err: any, row: any) => {
       if (err) reject(err);
       else resolve(row);
     });
@@ -21,7 +21,7 @@ async function main() {
       logger.warn('No events in DB to post');
       return;
     }
-    await sendEventNotification(row);
+    await sendEventNotification(row as any);
     logger.info({ id: row.id }, 'Posted last event');
   } catch (err) {
     logger.error({ err }, 'Failed to post last event');
