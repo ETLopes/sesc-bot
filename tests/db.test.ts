@@ -160,3 +160,19 @@ test('closeDatabase resolves on success', async () => {
   const db = await openDatabase();
   await expect(closeDatabase(db)).resolves.toBeUndefined();
 });
+
+describe('posted backlog helpers', () => {
+  test('getUnpostedEvents returns only unposted and markEventPosted updates record', async () => {
+    const mod = await import('../src/db.js');
+    process.env.DATABASE_PATH = ':memory:';
+    const db = await mod.openDatabase();
+    await mod.ensureSchema(db);
+    await mod.insertEvent(db, { id: 101, titulo: 'a' } as any);
+    await mod.insertEvent(db, { id: 102, titulo: 'b' } as any);
+    const before = await mod.getUnpostedEvents(db);
+    expect(before.map((e: any) => e.id)).toEqual([101, 102]);
+    await mod.markEventPosted(db, 101);
+    const after = await mod.getUnpostedEvents(db);
+    expect(after.map((e: any) => e.id)).toEqual([102]);
+  });
+});

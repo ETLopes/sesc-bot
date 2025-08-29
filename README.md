@@ -26,6 +26,7 @@ CATEGORIES=musica,teatro
 GRATUITO=
 ONLINE=
 SKIP_POST_ON_FIRST_SYNC=true
+DB_PROVIDER=sqlite # or 'pg' to use Postgres via DATABASE_URL
 LOG_LEVEL=info
 # Liveness / Watchdog (opcional)
 HEARTBEAT_PATH=./data/heartbeat.json
@@ -38,6 +39,7 @@ GRACE_SEC=120
 - `npm run dev` - roda com nodemon
 - `npm start` - roda o bot
 - `npm run post:last` - posta o último evento do banco (teste de formato)
+- `npm run migrate:sqlite-to-pg` - migra dados do SQLite local para o Postgres
 
 ### Funcionamento
 
@@ -71,6 +73,14 @@ docker compose up -d --build
 
 Notas:
 
-- Monte `./data` para persistir o SQLite.
+- Monte `./data` para persistir o SQLite (quando `DB_PROVIDER=sqlite`).
 - Use um `.env` na raiz (o compose carrega automaticamente).
 - A imagem usa um watchdog PID1 que verifica o `HEARTBEAT_PATH`; ajuste `LIVENESS_WINDOW_SEC`/`GRACE_SEC` via variáveis de ambiente para o seu cenário.
+
+# Funcionalidades futuras
+
+- Suporte a múltiplas categorias e canais.
+- Filtros adicionais (gratuito, online).
+- Notificações de eventos próximos.
+- Interface web para configuração e monitoramento.
+- Integração com outros serviços (Google Calendar, etc.).

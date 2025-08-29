@@ -54,6 +54,7 @@ export async function ensureSchema(db: sqlite3.Database): Promise<void> {
       qtdeIngressosWeb TEXT,
       categorias TEXT,
       imagem TEXT,
+      posted INTEGER NOT NULL DEFAULT 0,
       created_at TEXT,
       updated_at TEXT
     )`,
@@ -69,6 +70,11 @@ export async function ensureSchema(db: sqlite3.Database): Promise<void> {
   }
   if (!colNames.has('qtdeIngressosWeb')) {
     await run(db, 'ALTER TABLE events ADD COLUMN qtdeIngressosWeb TEXT');
+  }
+  if (!colNames.has('posted')) {
+    await run(db, 'ALTER TABLE events ADD COLUMN posted INTEGER NOT NULL DEFAULT 0');
+    // Mark all existing rows as already posted to avoid reposting historical events
+    await run(db, 'UPDATE events SET posted = 1 WHERE posted IS NULL OR posted = 0');
   }
 }
 
@@ -89,6 +95,7 @@ export type EventRecord = {
   qtdeIngressosWeb?: string | number | null | undefined;
   categorias?: string | null;
   imagem?: string | null;
+  posted?: 0 | 1;
 };
 
 export async function insertEvent(db: sqlite3.Database, event: EventRecord): Promise<boolean> {
@@ -98,8 +105,8 @@ export async function insertEvent(db: sqlite3.Database, event: EventRecord): Pro
       db,
       `INSERT INTO events(
         id, titulo, complemento, link, dataPrimeiraSessao, dataUltimaSessao, dataProxSessao,
-        unidade, qtdeIngressosWeb, categorias, imagem, created_at, updated_at
-      ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        unidade, qtdeIngressosWeb, categorias, imagem, posted, created_at, updated_at
+      ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         event.id,
         event.titulo || null,
@@ -114,6 +121,7 @@ export async function insertEvent(db: sqlite3.Database, event: EventRecord): Pro
           : null,
         event.categorias || null,
         event.imagem || null,
+        0,
         nowIso,
         nowIso,
       ],
@@ -125,6 +133,23 @@ export async function insertEvent(db: sqlite3.Database, event: EventRecord): Pro
     }
     throw err;
   }
+}
+
+export async function getUnpostedEvents(db: sqlite3.Database): Promise<EventRecord[]> {
+  const rows = await all<EventRecord>(
+    db,
+    `SELECT id, titulo, complemento, link, dataPrimeiraSessao, dataUltimaSessao, dataProxSessao,
+            unidade, qtdeIngressosWeb, categorias, imagem, posted
+       FROM events
+      WHERE posted = 0
+      ORDER BY created_at ASC`,
+  );
+  return rows;
+}
+
+export async function markEventPosted(db: sqlite3.Database, id: number): Promise<void> {
+  const nowIso = new Date().toISOString();
+  await run(db, 'UPDATE events SET posted = 1, updated_at = ? WHERE id = ?', [nowIso, id]);
 }
 
 export function closeDatabase(db: sqlite3.Database): Promise<void> {

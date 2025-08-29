@@ -8,6 +8,7 @@
         "start": "node dist/index.js",
         "test": "jest --env=node",
         "post:last": "node dist/scripts/postLastEvent.js",
+        "migrate:sqlite-to-pg": "node dist/scripts/migrateSqliteToPg.js",
         "lint": "eslint .",
         "format": "prettier --write .",
         "format:check": "prettier --check ."
@@ -22,6 +23,7 @@
         "node-fetch": "^3.3.2",
         "pino": "^9.9.0",
         "sqlite3": "^5.1.7",
+        "pg": "^8.12.0",
         "telegraf": "^4.16.3"
     },
     "devDependencies": {

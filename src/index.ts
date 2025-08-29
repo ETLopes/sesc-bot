@@ -6,7 +6,11 @@ import {
   insertEvent,
   closeDatabase,
   EventRecord,
-} from './db.js';
+  getUnpostedEvents,
+  markEventPosted,
+} from './dbProvider.js';
+// Use .js extension in ESM imports for runtime compatibility after build
+// jest maps to .ts via moduleNameMapper
 import fs from 'fs';
 import path from 'path';
 import { fetchSescEvents } from './sescApi.js';
@@ -51,6 +55,25 @@ async function syncOnce({
 
     let newCount = 0;
     let warnedTelegramMissing = false;
+
+    // Post backlog first when not in dry run mode
+    if (!isFirstRun || !SKIP_POST_ON_FIRST_SYNC) {
+      try {
+        const backlog = await getUnpostedEvents(db);
+        for (const row of backlog as unknown as EventRecord[]) {
+          try {
+            const posted = await sendEventNotification(row);
+            if (posted) {
+              await markEventPosted(db, row.id);
+            }
+          } catch (err) {
+            logger.error({ err, id: row.id }, 'Error posting backlog event');
+          }
+        }
+      } catch (e) {
+        logger.error({ e }, 'Failed to process backlog events');
+      }
+    }
     for (const ev of events as unknown as EventRecord[]) {
       if (existingIds.has(ev.id)) continue;
       const inserted = await insertEvent(db, ev);
@@ -63,6 +86,9 @@ async function syncOnce({
             const posted = await sendEventNotification(ev);
             if (!posted) {
               logger.info({ id: ev.id }, 'Event not posted (missing Telegram config/channel)');
+            }
+            if (posted) {
+              await markEventPosted(db, ev.id);
             }
           } catch (err) {
             const errMsg = err && err.message ? String(err.message) : '';

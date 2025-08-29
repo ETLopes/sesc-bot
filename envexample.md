@@ -10,7 +10,10 @@ TELEGRAM_CHANNEL_ID_MUSICA=
 TELEGRAM_CHANNEL_ID_TEATRO=
 
 # Database
+DB_PROVIDER=sqlite # 'sqlite' or 'pg'
 DATABASE_PATH=./data/sesc.db
+# When DB_PROVIDER=pg, set DATABASE_URL and ignore DATABASE_PATH
+DATABASE_URL=
 
 # Scheduler
 POLL_INTERVAL_MINUTES=60
@@ -40,9 +43,11 @@ Descriptions:
 - **TELEGRAM_CHANNEL_ID**: Fallback channel/chat id (e.g., @your_channel or numeric id).
 - **TELEGRAM_CHANNEL_ID_MUSICA**: Channel for música events.
 - **TELEGRAM_CHANNEL_ID_TEATRO**: Channel for teatro events.
+- **DB_PROVIDER**: Select database provider: `sqlite` (default) or `pg` (Postgres).
 - **DATABASE_PATH**: SQLite file path.
+- **DATABASE_URL**: Postgres connection string when `DB_PROVIDER=pg` (e.g., `postgres://user:pass@host:5432/db`).
 - **POLL_INTERVAL_MINUTES**: Minutes between syncs (default 60).
-- **SKIP_POST_ON_FIRST_SYNC**: If true, first run only saves; posting starts next run.
+- **SKIP_POST_ON_FIRST_SYNC**: If true, first run only saves; posting starts next run. Set to `false` when using Postgres (persistent DB).
 - **SESC_API_BASE**: Base endpoint for atividades filter.
 - **LOCAL_IDS**: Comma-separated Sesc SP unit ids to include.
 - **CATEGORIA_DEFAULT**: Default category to fetch (musica for now).

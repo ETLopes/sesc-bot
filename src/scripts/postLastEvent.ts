@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { openDatabase, ensureSchema, closeDatabase } from '../db.js';
+import { openDatabase, ensureSchema, closeDatabase, markEventPosted } from '../dbProvider.js';
 import { sendEventNotification } from '../telegram.js';
 import logger from '../logger.js';
 
@@ -21,8 +21,13 @@ async function main() {
       logger.warn('No events in DB to post');
       return;
     }
-    await sendEventNotification(row as any);
-    logger.info({ id: row.id }, 'Posted last event');
+    const posted = await sendEventNotification(row as any);
+    if (posted) {
+      await markEventPosted(db, row.id);
+      logger.info({ id: row.id }, 'Posted last event');
+    } else {
+      logger.info({ id: row.id }, 'Skipped posting last event (missing Telegram config/channel)');
+    }
   } catch (err) {
     logger.error({ err }, 'Failed to post last event');
     process.exitCode = 1;

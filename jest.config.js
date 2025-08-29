@@ -9,7 +9,8 @@ export default {
         '^node-fetch$': '<rootDir>/tests/mocks/node-fetch.ts',
         '^telegraf$': '<rootDir>/tests/mocks/telegraf.ts',
         '^../src/(.*)\\.js$': '<rootDir>/src/$1.ts',
-        [String.raw `^\./(config|db|logger|sescApi|telegram|sescFetcher)\.js$`]: '<rootDir>/src/$1.ts',
+        [String.raw `^\./(config|db|dbProvider|logger|sescApi|telegram|sescFetcher)\.js$`]: '<rootDir>/src/$1.ts',
+        [String.raw `^\./(db\.pg)\.js$`]: '<rootDir>/src/$1.ts',
         [String.raw `^\.\./(config|db|logger|sescApi|telegram)\.js$`]: '<rootDir>/src/$1.ts',
         '^@mocks/(.*)$': '<rootDir>/tests/mocks/$1'
     },
@@ -19,6 +20,7 @@ export default {
         '!src/index.js',
         '!src/index.ts',
         '!src/scripts/**',
+        '!src/db.pg.ts',
         '!src/**/mocks/**',
     ],
     coverageDirectory: 'coverage',

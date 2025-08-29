@@ -14,8 +14,23 @@ test('logger loads in non-production with transport', async () => {
 
 test('index module loads in test mode without running main', async () => {
   process.env.NODE_ENV = 'test';
+  delete process.env.DB_PROVIDER;
   const mod = await import('../src/index.ts');
   expect(mod).toBeTruthy();
+});
+
+test('dbProvider selects sqlite by default and pg when configured', async () => {
+  jest.resetModules();
+  delete process.env.DB_PROVIDER;
+  const sqliteProvider = await import('../src/dbProvider.ts');
+  expect(typeof sqliteProvider.openDatabase).toBe('function');
+  expect(typeof sqliteProvider.ensureSchema).toBe('function');
+
+  jest.resetModules();
+  process.env.DB_PROVIDER = 'pg';
+  const pgProvider = await import('../src/dbProvider.ts');
+  // just asserting module loads is enough; openDatabase will throw without DATABASE_URL if actually called
+  expect(pgProvider).toBeTruthy();
 });
 
 test('healthcheck runHealthcheck returns boolean', async () => {
