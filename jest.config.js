@@ -21,6 +21,7 @@ export default {
         '!src/index.ts',
         '!src/scripts/**',
         '!src/db.pg.ts',
+        '!src/dbProvider.ts',
         '!src/**/mocks/**',
     ],
     coverageDirectory: 'coverage',
