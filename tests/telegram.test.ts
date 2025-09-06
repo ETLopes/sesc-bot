@@ -171,6 +171,89 @@ describe('telegram message format', () => {
   });
 });
 
+describe('telegram pricing enrichment', () => {
+  beforeEach(() => {
+    jest.resetModules();
+    jest.clearAllMocks();
+    process.env.TELEGRAM_CHANNEL_ID = '@fallback';
+  });
+
+  test('includes Gratuito when pricing.gratuito = true', async () => {
+    const fetchMod: any = await import('node-fetch');
+    fetchMod.default.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ ultimaSessao: { gratuito: true } }),
+      text: async () => '',
+      status: 200,
+      statusText: 'OK',
+    });
+    const { sendEventNotification } = await import('../src/telegram.js');
+    const injectedBot = { telegram: { sendMessage: jest.fn().mockResolvedValue({}) } } as any;
+    await sendEventNotification({ id: 1, id_java: '100', titulo: 'X' } as any, injectedBot);
+    const [_chat, text] = (injectedBot.telegram.sendMessage as any).mock.calls[0];
+    expect(text).toMatch('Gratuito');
+    expect(text).not.toMatch('Valores:');
+  });
+
+  test('includes formatted prices when not gratuito', async () => {
+    const fetchMod: any = await import('node-fetch');
+    fetchMod.default.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        sessoes: [
+          {
+            valorInteiraFmt: '$50.00',
+            valorMeiaFmt: '$25.00',
+            valorComerciarioFmt: '$15.00',
+            gratuito: false,
+            dataInicialVendaOnlineFmt: '2025-08-19T17:00',
+          },
+        ],
+      }),
+      text: async () => '',
+      status: 200,
+      statusText: 'OK',
+    });
+    const { sendEventNotification } = await import('../src/telegram.js');
+    const injectedBot = { telegram: { sendMessage: jest.fn().mockResolvedValue({}) } } as any;
+    await sendEventNotification({ id: 2, id_java: '200', titulo: 'Y' } as any, injectedBot);
+    const [_chat, text] = (injectedBot.telegram.sendMessage as any).mock.calls[0];
+    expect(text).toMatch('Venda online: 2025-08-19T17:00');
+    expect(text).toMatch('Valores: Inteira: $50.00 | Meia: $25.00 | Comerciário: $15.00');
+    expect(text).not.toMatch('Gratuito');
+  });
+
+  test('ignores pricing fetch error and still sends message', async () => {
+    const fetchMod: any = await import('node-fetch');
+    fetchMod.default.mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      statusText: 'Internal',
+      text: async () => 'boom',
+    });
+    const { sendEventNotification } = await import('../src/telegram.js');
+    const injectedBot = { telegram: { sendMessage: jest.fn().mockResolvedValue({}) } } as any;
+    await sendEventNotification({ id: 3, id_java: '300', titulo: 'Z' } as any, injectedBot);
+    expect(injectedBot.telegram.sendMessage).toHaveBeenCalled();
+  });
+
+  test('does not include Valores when all price fields missing and not gratuito', async () => {
+    const fetchMod: any = await import('node-fetch');
+    fetchMod.default.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ ultimaSessao: { gratuito: false } }),
+      text: async () => '',
+      status: 200,
+      statusText: 'OK',
+    });
+    const { sendEventNotification } = await import('../src/telegram.js');
+    const injectedBot = { telegram: { sendMessage: jest.fn().mockResolvedValue({}) } } as any;
+    await sendEventNotification({ id: 10, id_java: 'x', titulo: 't' } as any, injectedBot);
+    const [_chat, text] = (injectedBot.telegram.sendMessage as any).mock.calls[0];
+    expect(text).not.toMatch('Valores:');
+  });
+});
+
 test('caption includes all optional fields when present', async () => {
   const fakeBot = { telegram: { sendMessage: jest.fn().mockResolvedValue({}) } } as any;
   process.env.TELEGRAM_CHANNEL_ID = '@fallback';
