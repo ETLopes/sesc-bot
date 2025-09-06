@@ -6,6 +6,7 @@ import {
   TELEGRAM_CHANNEL_ID_TEATRO,
 } from './config.js';
 import logger from './logger.js';
+import { fetchSessionPricingByIdJava } from './sescApi.js';
 
 let botInstance: Telegraf | null = null;
 
@@ -22,6 +23,7 @@ export function getBot(): Telegraf | null {
 
 export type EventForTelegram = {
   id: number;
+  id_java?: string | null;
   titulo?: string | null;
   complemento?: string | null;
   dataProxSessao?: string | null;
@@ -67,6 +69,26 @@ export async function sendEventNotification(
   if (event.complemento) parts.push(event.complemento);
   if (event.dataProxSessao) parts.push(`Data: ${fmtDate(event.dataProxSessao)}`);
   if (event.unidade) parts.push(`Unidade: ${event.unidade}`);
+  // Try to enrich with pricing info from portal by id_java
+  try {
+    const pricing = await fetchSessionPricingByIdJava((event as any).id_java);
+    if (pricing) {
+      if (pricing.dataInicialVendaOnlineFmt)
+        parts.push(`Venda online: ${pricing.dataInicialVendaOnlineFmt}`);
+      if (pricing.gratuito) {
+        parts.push('Gratuito');
+      } else {
+        const priceBits = [
+          pricing.valorInteiraFmt ? `Inteira: ${pricing.valorInteiraFmt}` : null,
+          pricing.valorMeiaFmt ? `Meia: ${pricing.valorMeiaFmt}` : null,
+          pricing.valorComerciarioFmt ? `Comerciário: ${pricing.valorComerciarioFmt}` : null,
+        ].filter(Boolean) as string[];
+        if (priceBits.length) parts.push(`Valores: ${priceBits.join(' | ')}`);
+      }
+    }
+  } catch (e) {
+    // ignore pricing fetch errors to not block notifications
+  }
   if (event.qtdeIngressosWeb !== null && event.qtdeIngressosWeb !== undefined)
     parts.push(`Ingressos (web): ${event.qtdeIngressosWeb}`);
   if (event.categorias) parts.push(`Categorias: ${event.categorias}`);

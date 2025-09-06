@@ -190,3 +190,205 @@ describe('sescApi.core', () => {
     expect(e.id).toBe(9);
   });
 });
+
+describe('sescApi.pricing', () => {
+  beforeEach(() => {
+    jest.resetModules();
+    jest.clearAllMocks();
+  });
+
+  test('returns pricing from first sessoes item when present', async () => {
+    const fetchMod: any = await import('node-fetch');
+    fetchMod.default.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        sessoes: [
+          {
+            valorInteiraFmt: '$50.00',
+            valorMeiaFmt: '$25.00',
+            valorComerciarioFmt: '$15.00',
+            gratuito: false,
+          },
+        ],
+      }),
+      text: async () => '',
+      status: 200,
+      statusText: 'OK',
+    });
+    const { fetchSessionPricingByIdJava } = await import('../src/sescApi.js');
+    const pricing = await fetchSessionPricingByIdJava('123');
+    expect(pricing).toEqual({
+      valorInteiraFmt: '$50.00',
+      valorMeiaFmt: '$25.00',
+      valorComerciarioFmt: '$15.00',
+      gratuito: false,
+      dataInicialVendaOnlineFmt: null,
+    });
+  });
+
+  test('falls back to ultimaSessao when sessoes is missing/empty', async () => {
+    const fetchMod: any = await import('node-fetch');
+    fetchMod.default.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        sessoes: [],
+        ultimaSessao: {
+          valorInteiraFmt: '$40.00',
+          valorMeiaFmt: '$20.00',
+          valorComerciarioFmt: '$12.00',
+          gratuito: true,
+          dataInicialVendaOnlineFmt: '2025-08-19T17:00',
+        },
+      }),
+      text: async () => '',
+      status: 200,
+      statusText: 'OK',
+    });
+    const { fetchSessionPricingByIdJava } = await import('../src/sescApi.js');
+    const pricing = await fetchSessionPricingByIdJava('456');
+    expect(pricing).toEqual({
+      valorInteiraFmt: '$40.00',
+      valorMeiaFmt: '$20.00',
+      valorComerciarioFmt: '$12.00',
+      gratuito: true,
+      dataInicialVendaOnlineFmt: '2025-08-19T17:00',
+    });
+  });
+
+  test('returns null when idJava is falsy', async () => {
+    const fetchMod: any = await import('node-fetch');
+    fetchMod.default.mockClear();
+    const { fetchSessionPricingByIdJava } = await import('../src/sescApi.js');
+    const pricing = await fetchSessionPricingByIdJava(undefined as any);
+    expect(pricing).toBeNull();
+    expect(fetchMod.default).not.toHaveBeenCalled();
+  });
+
+  test('throws on non-ok response', async () => {
+    const fetchMod: any = await import('node-fetch');
+    fetchMod.default.mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      statusText: 'Internal',
+      text: async () => 'boom',
+    });
+    const { fetchSessionPricingByIdJava } = await import('../src/sescApi.js');
+    await expect(fetchSessionPricingByIdJava('789')).rejects.toThrow(
+      /Failed to fetch session pricing/,
+    );
+  });
+
+  test('non-ok response with text() reject still throws with fallback message', async () => {
+    const fetchMod: any = await import('node-fetch');
+    fetchMod.default.mockResolvedValueOnce({
+      ok: false,
+      status: 503,
+      statusText: 'Service Unavailable',
+      text: async () => {
+        throw new Error('fail text');
+      },
+    });
+    const { fetchSessionPricingByIdJava } = await import('../src/sescApi.js');
+    await expect(fetchSessionPricingByIdJava('123')).rejects.toThrow(
+      /Failed to fetch session pricing/,
+    );
+  });
+
+  test('returns null when both sessoes and ultimaSessao are missing', async () => {
+    const fetchMod: any = await import('node-fetch');
+    fetchMod.default.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({}),
+      text: async () => '',
+      status: 200,
+      statusText: 'OK',
+    });
+    const { fetchSessionPricingByIdJava } = await import('../src/sescApi.js');
+    const pricing = await fetchSessionPricingByIdJava('999');
+    expect(pricing).toBeNull();
+  });
+
+  test('maps gratuito to null when missing in payload', async () => {
+    const fetchMod: any = await import('node-fetch');
+    fetchMod.default.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ sessoes: [{ valorInteiraFmt: '$10.00' }] }),
+      text: async () => '',
+      status: 200,
+      statusText: 'OK',
+    });
+    const { fetchSessionPricingByIdJava } = await import('../src/sescApi.js');
+    const pricing = await fetchSessionPricingByIdJava('1000');
+    expect(pricing).toEqual({
+      valorInteiraFmt: '$10.00',
+      valorMeiaFmt: null,
+      valorComerciarioFmt: null,
+      gratuito: null,
+      dataInicialVendaOnlineFmt: null,
+    });
+  });
+});
+
+describe('sescApi.normalize.extras', () => {
+  beforeEach(() => {
+    jest.resetModules();
+    jest.clearAllMocks();
+  });
+
+  test('maps conjunto and acaoFormativa arrays', async () => {
+    const { normalizeEvent } = await import('../src/sescApi.js');
+    const raw: any = {
+      id: 1,
+      conjunto: [{ name: null, link: null }],
+      acaoFormativa: [{ name: 'n', link: 'l' }],
+    };
+    const e: any = normalizeEvent(raw);
+    expect(e.conjunto).toEqual([{ name: null, link: null }]);
+    expect(e.acaoFormativa).toEqual([{ name: 'n', link: 'l' }]);
+  });
+
+  test('sets conjunto and acaoFormativa to null when not arrays', async () => {
+    const { normalizeEvent } = await import('../src/sescApi.js');
+    const raw: any = { id: 2, conjunto: null, acaoFormativa: 'x' };
+    const e: any = normalizeEvent(raw);
+    expect(e.conjunto).toBeNull();
+    expect(e.acaoFormativa).toBeNull();
+  });
+
+  test('maps id_java, qtdeIngressosRede, codigoStatusEvento, quantDatas, imagens and totem', async () => {
+    const { normalizeEvent } = await import('../src/sescApi.js');
+    const raw: any = {
+      id: 3,
+      id_java: '250053',
+      qtdeIngressosRede: 7,
+      codigoStatusEvento: '2',
+      quantDatas: '',
+      imagens: {
+        medium: { file: 'a.jpg', width: 1, height: 1, 'mime-type': 'image/jpeg', filesize: 10 },
+      },
+      totem: { ativo: 1, andar: null, recomendacao_etaria: null, tags: null },
+    };
+    const e: any = normalizeEvent(raw);
+    expect(e.id_java).toBe('250053');
+    expect(e.qtdeIngressosRede).toBe(7);
+    expect(e.codigoStatusEvento).toBe('2');
+    expect(e.quantDatas).toBe('');
+    expect(e.imagens).toBeTruthy();
+    expect(e.totem).toEqual({ ativo: true, andar: null, recomendacao_etaria: null, tags: null });
+  });
+
+  test('acaoFormativa/conjunto mapping tolerates undefined items and missing fields', async () => {
+    const { normalizeEvent } = await import('../src/sescApi.js');
+    const raw: any = {
+      id: 4,
+      acaoFormativa: [undefined, { name: undefined, link: 'only-link' }],
+      conjunto: [{ name: 'only-name' }],
+    };
+    const e: any = normalizeEvent(raw);
+    expect(e.acaoFormativa).toEqual([
+      { name: null, link: null },
+      { name: null, link: 'only-link' },
+    ]);
+    expect(e.conjunto).toEqual([{ name: 'only-name', link: null }]);
+  });
+});
