@@ -10,7 +10,8 @@
         "post:last": "node dist/scripts/postLastEvent.js",
         "lint": "eslint .",
         "format": "prettier --write .",
-        "format:check": "prettier --check ."
+        "format:check": "prettier --check .",
+        "prepare": "husky"
     },
     "keywords": [],
     "author": "",
@@ -38,6 +39,7 @@
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-prettier": "^5.5.4",
         "globals": "^16.3.0",
+        "husky": "^9.1.7",
         "jest": "^29.7.0",
         "jest-environment-node": "^29.7.0",
         "nodemon": "^3.1.10",
